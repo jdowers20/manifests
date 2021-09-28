@@ -1,24 +1,27 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kubernetes-dashboard
-  namespace: kube-system
+  namespace: kubernetes-dashboard
   annotations:
-    kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: letsencrypt
     nginx.ingress.kubernetes.io/auth-type: "basic"
     nginx.ingress.kubernetes.io/auth-secret: kubernetes-dashboard-auth
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
 spec:
   tls:
   - hosts:
-    - dashboard.example.com
+    - dashboard.dowers.link
     secretName: kubernetes-dashboard-tls
   rules:
-  - host: dashboard.example.com
+  - host: dashboard.dowers.link
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: kubernetes-dashboard
-          servicePort: http
+          service:
+            name: kubernetes-dashboard
+            port:
+              number: 443

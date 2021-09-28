@@ -29,7 +29,7 @@ spec:
       hostNetwork: true
       terminationGracePeriodSeconds: 60
       containers:
-      - image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.20.0
+      - image: k8s.gcr.io/ingress-nginx/controller:v1.0.0
         name: nginx-ingress-controller
         imagePullPolicy: Always
         ports:
@@ -51,6 +51,7 @@ spec:
         - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
         - --configmap=$(POD_NAMESPACE)/nginx-ingress-controller
         - --annotations-prefix=nginx.ingress.kubernetes.io
+        - --default-ssl-certificate=default/foo-tls
         readinessProbe:
           httpGet:
             path: /healthz
