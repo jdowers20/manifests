@@ -10,7 +10,7 @@
 # Most of the sections are prefixed with a 'OLM' keyword which is used to build our CSV for an OLM (Operator Life Cycle manager)
 ###################################################################################################################
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephclusters.ceph.rook.io
@@ -22,178 +22,225 @@ spec:
     plural: cephclusters
     singular: cephcluster
   scope: Namespaced
-  version: v1
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          properties:
-            annotations: {}
-            cephVersion:
-              properties:
-                allowUnsupported:
-                  type: boolean
-                image:
-                  type: string
-            dashboard:
-              properties:
-                enabled:
-                  type: boolean
-                urlPrefix:
-                  type: string
-                port:
-                  type: integer
-                  minimum: 0
-                  maximum: 65535
-                ssl:
-                  type: boolean
-            dataDirHostPath:
-              pattern: ^/(\S+)
-              type: string
-            disruptionManagement:
-              properties:
-                machineDisruptionBudgetNamespace:
-                  type: string
-                managePodBudgets:
-                  type: boolean
-                osdMaintenanceTimeout:
-                  type: integer
-                manageMachineDisruptionBudgets:
-                  type: boolean
-            skipUpgradeChecks:
-              type: boolean
-            mon:
-              properties:
-                allowMultiplePerNode:
-                  type: boolean
-                count:
-                  maximum: 9
-                  minimum: 0
-                  type: integer
-                volumeClaimTemplate: {}
-            mgr:
-              properties:
-                modules:
-                  items:
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              annotations:
+                type: object
+                properties: {}
+              cephVersion:
+                type: object
+                properties:
+                  allowUnsupported:
+                    type: boolean
+                  image:
+                    type: string
+              dashboard:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  urlPrefix:
+                    type: string
+                  port:
+                    type: integer
+                    minimum: 0
+                    maximum: 65535
+                  ssl:
+                    type: boolean
+              dataDirHostPath:
+                pattern: ^/(\S+)
+                type: string
+              disruptionManagement:
+                type: object
+                properties:
+                  machineDisruptionBudgetNamespace:
+                    type: string
+                  managePodBudgets:
+                    type: boolean
+                  osdMaintenanceTimeout:
+                    type: integer
+                  manageMachineDisruptionBudgets:
+                    type: boolean
+              skipUpgradeChecks:
+                type: boolean
+              mon:
+                type: object
+                properties:
+                  allowMultiplePerNode:
+                    type: boolean
+                  count:
+                    maximum: 9
+                    minimum: 0
+                    type: integer
+                  volumeClaimTemplate:
+                    type: object
+                    properties: {}
+              mgr:
+                type: object
+                properties:
+                  modules:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        enabled:
+                          type: boolean
+              network:
+                type: object
+                properties:
+                  hostNetwork:
+                    type: boolean
+              storage:
+                type: object
+                properties:
+                  disruptionManagement:
+                    type: object
                     properties:
-                      name:
+                      machineDisruptionBudgetNamespace:
                         type: string
-                      enabled:
+                      managePodBudgets:
                         type: boolean
-            network:
-              properties:
-                hostNetwork:
-                  type: boolean
-            storage:
-              properties:
-                disruptionManagement:
-                  properties:
-                    machineDisruptionBudgetNamespace:
-                      type: string
-                    managePodBudgets:
-                      type: boolean
-                    osdMaintenanceTimeout:
-                      type: integer
-                    manageMachineDisruptionBudgets:
-                      type: boolean
-                useAllNodes:
-                  type: boolean
-                nodes:
-                  items:
-                    properties:
-                      name:
-                        type: string
-                      config:
-                        properties:
-                          metadataDevice:
-                            type: string
-                          storeType:
-                            type: string
-                            pattern: ^(filestore|bluestore)$
-                          databaseSizeMB:
-                            type: string
-                          walSizeMB:
-                            type: string
-                          journalSizeMB:
-                            type: string
-                          osdsPerDevice:
-                            type: string
-                          encryptedDevice:
-                            type: string
-                            pattern: ^(true|false)$
-                      useAllDevices:
+                      osdMaintenanceTimeout:
+                        type: integer
+                      manageMachineDisruptionBudgets:
                         type: boolean
-                      deviceFilter: {}
-                      directories:
-                        type: array
-                        items:
+                  useAllNodes:
+                    type: boolean
+                  nodes:
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        config:
+                          type: object
                           properties:
-                            path:
+                            metadataDevice:
                               type: string
-                      devices:
-                        type: array
-                        items:
-                          properties:
-                            name:
+                            storeType:
                               type: string
-                            config: {}
-                      location: {}
-                      resources: {}
-                  type: array
-                useAllDevices:
-                  type: boolean
-                deviceFilter: {}
-                location: {}
-                directories:
-                  type: array
-                  items:
-                    properties:
-                      path:
-                        type: string
-                config: {}
-                topologyAware:
-                  type: boolean
-                storageClassDeviceSets: {}
-            monitoring:
-              properties:
-                enabled:
-                  type: boolean
-                rulesNamespace:
-                  type: string
-            rbdMirroring:
-              properties:
-                workers:
-                  type: integer
-            external:
-              properties:
-                enable:
-                  type: boolean
-            placement: {}
-            resources: {}
-  additionalPrinterColumns:
-    - name: DataDirHostPath
-      type: string
-      description: Directory used on the K8s nodes
-      JSONPath: .spec.dataDirHostPath
-    - name: MonCount
-      type: string
-      description: Number of MONs
-      JSONPath: .spec.mon.count
-    - name: Age
-      type: date
-      JSONPath: .metadata.creationTimestamp
-    - name: State
-      type: string
-      description: Current State
-      JSONPath: .status.state
-    - name: Health
-      type: string
-      description: Ceph Health
-      JSONPath: .status.ceph.health
+                              pattern: ^(filestore|bluestore)$
+                            databaseSizeMB:
+                              type: string
+                            walSizeMB:
+                              type: string
+                            journalSizeMB:
+                              type: string
+                            osdsPerDevice:
+                              type: string
+                            encryptedDevice:
+                              type: string
+                              pattern: ^(true|false)$
+                        useAllDevices:
+                          type: boolean
+                        deviceFilter:
+                          type: object
+                          properties: {}
+                        directories:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              path:
+                                type: string
+                        devices:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              config:
+                                type: object
+                                properties: {}
+                        location:
+                          type: object
+                          properties: {}
+                        resources:
+                          type: object
+                          properties: {}
+                    type: array
+                  useAllDevices:
+                    type: boolean
+                  deviceFilter:
+                    type: object
+                    properties: {}
+                  location:
+                    type: object
+                    properties: {}
+                  directories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                  config:
+                    type: object
+                    properties: {}
+                  topologyAware:
+                    type: boolean
+                  storageClassDeviceSets:
+                    type: object
+                    properties: {}
+              monitoring:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  rulesNamespace:
+                    type: string
+              rbdMirroring:
+                type: object
+                properties:
+                  workers:
+                    type: integer
+              external:
+                type: object
+                properties:
+                  enable:
+                    type: boolean
+              placement:
+                type: object
+                properties: {}
+              resources:
+                type: object
+                properties: {}
+    additionalPrinterColumns:
+      - name: DataDirHostPath
+        type: string
+        description: Directory used on the K8s nodes
+        jsonPath: .spec.dataDirHostPath
+      - name: MonCount
+        type: string
+        description: Number of MONs
+        jsonPath: .spec.mon.count
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
+      - name: State
+        type: string
+        description: Current State
+        jsonPath: .status.state
+      - name: Health
+        type: string
+        description: Ceph Health
+        jsonPath: .status.ceph.health
 # OLM: END CEPH CRD
 # OLM: BEGIN CEPH FS CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephfilesystems.ceph.rook.io
@@ -205,63 +252,81 @@ spec:
     plural: cephfilesystems
     singular: cephfilesystem
   scope: Namespaced
-  version: v1
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          properties:
-            metadataServer:
-              properties:
-                activeCount:
-                  type: integer
-                activeStandby:
-                  type: boolean
-                annotations: {}
-                placement: {}
-                resources: {}
-            metadataPool:
-              properties:
-                failureDomain:
-                  type: string
-                replicated:
-                  properties:
-                    size:
-                      type: integer
-                erasureCoded:
-                  properties:
-                    dataChunks:
-                      type: integer
-                    codingChunks:
-                      type: integer
-            dataPools:
-              type: array
-              items:
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              metadataServer:
+                type: object
+                properties:
+                  activeCount:
+                    type: integer
+                  activeStandby:
+                    type: boolean
+                  annotations:
+                    type: object
+                    properties: {}
+                  placement:
+                    type: object
+                    properties: {}
+                  resources:
+                    type: object
+                    properties: {}
+              metadataPool:
+                type: object
                 properties:
                   failureDomain:
                     type: string
                   replicated:
+                    type: object
                     properties:
                       size:
                         type: integer
                   erasureCoded:
+                    type: object
                     properties:
                       dataChunks:
                         type: integer
                       codingChunks:
                         type: integer
-  additionalPrinterColumns:
-    - name: ActiveMDS
-      type: string
-      description: Number of desired active MDS daemons
-      JSONPath: .spec.metadataServer.activeCount
-    - name: Age
-      type: date
-      JSONPath: .metadata.creationTimestamp
+              dataPools:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    failureDomain:
+                      type: string
+                    replicated:
+                      type: object
+                      properties:
+                        size:
+                          type: integer
+                    erasureCoded:
+                      type: object
+                      properties:
+                        dataChunks:
+                          type: integer
+                        codingChunks:
+                          type: integer
+    additionalPrinterColumns:
+      - name: ActiveMDS
+        type: string
+        description: Number of desired active MDS daemons
+        jsonPath: .spec.metadataServer.activeCount
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
 # OLM: END CEPH FS CRD
 # OLM: BEGIN CEPH NFS CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephnfses.ceph.rook.io
@@ -275,30 +340,43 @@ spec:
     shortNames:
     - nfs
   scope: Namespaced
-  version: v1
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          properties:
-            rados:
-              properties:
-                pool:
-                  type: string
-                namespace:
-                  type: string
-            server:
-              properties:
-                active:
-                  type: integer
-                annotations: {}
-                placement: {}
-                resources: {}
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              rados:
+                type: object
+                properties:
+                  pool:
+                    type: string
+                  namespace:
+                    type: string
+              server:
+                type: object
+                properties:
+                  active:
+                    type: integer
+                  annotations:
+                    type: object
+                    properties: {}
+                  placement:
+                    type: object
+                    properties: {}
+                  resources:
+                    type: object
+                    properties: {}
 
 # OLM: END CEPH NFS CRD
 # OLM: BEGIN CEPH OBJECT STORE CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectstores.ceph.rook.io
@@ -310,57 +388,79 @@ spec:
     plural: cephobjectstores
     singular: cephobjectstore
   scope: Namespaced
-  version: v1
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          properties:
-            gateway:
-              properties:
-                type:
-                  type: string
-                sslCertificateRef: {}
-                port:
-                  type: integer
-                securePort: {}
-                instances:
-                  type: integer
-                annotations: {}
-                placement: {}
-                resources: {}
-            metadataPool:
-              properties:
-                failureDomain:
-                  type: string
-                replicated:
-                  properties:
-                    size:
-                      type: integer
-                erasureCoded:
-                  properties:
-                    dataChunks:
-                      type: integer
-                    codingChunks:
-                      type: integer
-            dataPool:
-              properties:
-                failureDomain:
-                  type: string
-                replicated:
-                  properties:
-                    size:
-                      type: integer
-                erasureCoded:
-                  properties:
-                    dataChunks:
-                      type: integer
-                    codingChunks:
-                      type: integer
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              gateway:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  sslCertificateRef:
+                    type: object
+                  port:
+                    type: integer
+                  securePort:
+                    type: object
+                    properties: {}
+                  instances:
+                    type: integer
+                    properties: {}
+                  annotations:
+                    type: object
+                    properties: {}
+                  placement:
+                    type: object
+                    properties: {}
+                  resources:
+                    type: object
+                    properties: {}
+              metadataPool:
+                type: object
+                properties:
+                  failureDomain:
+                    type: string
+                  replicated:
+                    type: object
+                    properties:
+                      size:
+                        type: integer
+                  erasureCoded:
+                    type: object
+                    properties:
+                      dataChunks:
+                        type: integer
+                      codingChunks:
+                        type: integer
+              dataPool:
+                type: object
+                properties:
+                  failureDomain:
+                    type: string
+                  replicated:
+                    type: object
+                    properties:
+                      size:
+                        type: integer
+                  erasureCoded:
+                    type: object
+                    properties:
+                      dataChunks:
+                        type: integer
+                      codingChunks:
+                        type: integer
 # OLM: END CEPH OBJECT STORE CRD
 # OLM: BEGIN CEPH OBJECT STORE USERS CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectstoreusers.ceph.rook.io
@@ -372,11 +472,18 @@ spec:
     plural: cephobjectstoreusers
     singular: cephobjectstoreuser
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties: {}
 # OLM: END CEPH OBJECT STORE USERS CRD
 # OLM: BEGIN CEPH BLOCK POOL CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephblockpools.ceph.rook.io
@@ -388,11 +495,18 @@ spec:
     plural: cephblockpools
     singular: cephblockpool
   scope: Namespaced
-  version: v1
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties: {}
 # OLM: END CEPH BLOCK POOL CRD
 # OLM: BEGIN CEPH VOLUME POOL CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: volumes.rook.io
@@ -406,11 +520,18 @@ spec:
     shortNames:
     - rv
   scope: Namespaced
-  version: v1alpha2
+  versions:
+  - name: v1alpha2
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties: {}
 # OLM: END CEPH VOLUME POOL CRD
 # OLM: BEGIN OBJECTBUCKET CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: objectbuckets.objectbucket.io
@@ -420,6 +541,12 @@ spec:
     - name: v1alpha1
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties: {}
+      subresources:
+        status: {}
   names:
     kind: ObjectBucket
     listKind: ObjectBucketList
@@ -429,12 +556,10 @@ spec:
       - ob
       - obs
   scope: Cluster
-  subresources:
-    status: {}
 # OLM: END OBJECTBUCKET CRD
 # OLM: BEGIN OBJECTBUCKETCLAIM CRD
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: objectbucketclaims.objectbucket.io
@@ -443,6 +568,12 @@ spec:
     - name: v1alpha1
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties: {}
+      subresources:
+        status: {}
   group: objectbucket.io
   names:
     kind: ObjectBucketClaim
@@ -453,13 +584,11 @@ spec:
       - obc
       - obcs
   scope: Namespaced
-  subresources:
-    status: {}
 # OLM: END OBJECTBUCKETCLAIM CRD
 # OLM: BEGIN OBJECTBUCKET ROLEBINDING
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-object-bucket
 roleRef:
@@ -474,7 +603,7 @@ subjects:
 # OLM: BEGIN OPERATOR ROLE
 ---
 # The cluster role for managing all the cluster-specific resources in a namespace
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: rook-ceph-cluster-mgmt
@@ -487,7 +616,7 @@ aggregationRule:
       rbac.ceph.rook.io/aggregate-to-rook-ceph-cluster-mgmt: "true"
 rules: []
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: rook-ceph-cluster-mgmt-rules
@@ -526,7 +655,7 @@ rules:
   - delete
 ---
 # The role for the operator to manage resources in its own namespace
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: rook-ceph-system
@@ -564,7 +693,7 @@ rules:
   - delete
 ---
 # The cluster role for managing the Rook CRDs
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: rook-ceph-global
@@ -577,7 +706,7 @@ aggregationRule:
       rbac.ceph.rook.io/aggregate-to-rook-ceph-global: "true"
 rules: []
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: rook-ceph-global-rules
@@ -680,7 +809,7 @@ rules:
 ---
 # Aspects of ceph-mgr that require cluster-wide access
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr-cluster
   labels:
@@ -693,7 +822,7 @@ aggregationRule:
 rules: []
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr-cluster-rules
   labels:
@@ -723,7 +852,7 @@ rules:
   - watch
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-object-bucket
   labels:
@@ -772,7 +901,7 @@ metadata:
 ---
 # Grant the operator, agent, and discovery agents access to resources in the namespace
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-system
   namespace: rook
@@ -790,7 +919,7 @@ subjects:
 ---
 # Grant the rook system daemons cluster-wide access to manage the Rook CRDs, PVCs, and storage classes
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-global
   namespace: rook
@@ -846,7 +975,7 @@ metadata:
 # OLM: BEGIN CLUSTER ROLE
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-osd
   namespace: rook
@@ -859,7 +988,7 @@ rules:
   verbs: [ "get", "list", "create", "update", "delete" ]
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-osd
   namespace: rook
@@ -874,7 +1003,7 @@ rules:
 ---
 # Aspects of ceph-mgr that require access to the system namespace
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr-system
   namespace: rook
@@ -885,7 +1014,7 @@ aggregationRule:
 rules: []
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr-system-rules
   namespace: rook
@@ -903,7 +1032,7 @@ rules:
 ---
 # Aspects of ceph-mgr that operate within the cluster's namespace
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr
   namespace: rook
@@ -938,7 +1067,7 @@ rules:
 # OLM: BEGIN CMD REPORTER ROLE
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-cmd-reporter
   namespace: rook
@@ -960,7 +1089,7 @@ rules:
 ---
 # Allow the operator to create resources in this cluster's namespace
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-cluster-mgmt
   namespace: rook
@@ -975,7 +1104,7 @@ subjects:
 ---
 # Allow the osd pods in this namespace to work with configmaps
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-osd
   namespace: rook
@@ -990,7 +1119,7 @@ subjects:
 ---
 # Allow the ceph mgr to access the cluster-specific resources necessary for the mgr modules
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr
   namespace: rook
@@ -1005,7 +1134,7 @@ subjects:
 ---
 # Allow the ceph mgr to access the rook system resources necessary for the mgr modules
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr-system
   namespace: rook
@@ -1020,7 +1149,7 @@ subjects:
 ---
 # Allow the ceph mgr to access cluster-wide resources necessary for the mgr modules
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-mgr-cluster
 roleRef:
@@ -1035,7 +1164,7 @@ subjects:
 ---
 # Allow the ceph osd to access cluster-wide resources necessary for determining their topology location
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-osd
 roleRef:
@@ -1051,7 +1180,7 @@ subjects:
 # OLM: BEGIN CMD REPORTER ROLEBINDING
 ---
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: rook-ceph-cmd-reporter
   namespace: rook

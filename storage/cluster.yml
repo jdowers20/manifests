@@ -24,8 +24,4 @@ spec:
     storeConfig:
       databaseSizeMB: 1024
       journalSizeMB: 1024
-    # Uncomment the following line and replace it with the name of block device used for storage:
-    #deviceFilter: sdb
-    # Uncomment the following lines when using a directory for storage:
-    #directories:
-    #- path: /storage/data
+    deviceFilter: vdb

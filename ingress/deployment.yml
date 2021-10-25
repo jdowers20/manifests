@@ -12,6 +12,9 @@ spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9102'
       labels:
         k8s-app: nginx-ingress-controller
     spec:
